@@ -13,7 +13,6 @@ const ResponseSchema = z.object({
   suggestions: z.string(),
 });
 
-// small skill normalization map
 const SKILL_NORMALIZE = {
   node: "Node.js",
   "node.js": "Node.js",
@@ -46,7 +45,6 @@ function parseLLMJson(llmText) {
   }
 }
 
-// simple fallback score calculator based on skills lists
 function computeServerScore(matchedSkills = [], missingSkills = []) {
   const total = matchedSkills.length + missingSkills.length;
   if (total === 0) return 0;
@@ -57,40 +55,36 @@ function computeServerScore(matchedSkills = [], missingSkills = []) {
 const analyzeResume = async (req, res) => {
   let uploadedPath = null;
   try {
-    console.log("=== ANALYZE DEBUG ===");
-    console.log("content-type header:", req.headers["content-type"]);
-    console.log("req.body keys:", Object.keys(req.body || {}));
-    console.log(
-      "req.file present:",
-      !!req.file,
-      req.file
-        ? {
-            fieldname: req.file.fieldname,
-            originalname: req.file.originalname,
-            mimetype: req.file.mimetype,
-            path: req.file.path,
-            size: req.file.size,
-          }
-        : null
-    );
-    console.log("=====================");
+    // console.log("=== ANALYZE DEBUG ===");
+    // console.log("content-type header:", req.headers["content-type"]);
+    // console.log("req.body keys:", Object.keys(req.body || {}));
+    // console.log(
+    //   "req.file present:",
+    //   !!req.file,
+    //   req.file
+    //     ? {
+    //         fieldname: req.file.fieldname,
+    //         originalname: req.file.originalname,
+    //         mimetype: req.file.mimetype,
+    //         path: req.file.path,
+    //         size: req.file.size,
+    //       }
+    //     : null+
+    // );
+    // console.log("=====================");
 
     let resumeText = req.body?.resumeText || "";
     const jobDescription = req.body?.jobDescription || "";
 
-    // If file uploaded, parse it
     if (!resumeText && req.file) {
       uploadedPath = req.file.path;
       const buffer = fs.readFileSync(uploadedPath);
       const data = await pdfParse(buffer);
       resumeText = data.text || "";
-      // remove upload (we'll also try-catch in finally)
       try {
         fs.unlinkSync(uploadedPath);
         uploadedPath = null;
-      } catch (e) {
-        /* ignore */
-      }
+      } catch (e) {}
     }
 
     if (
@@ -103,22 +97,18 @@ const analyzeResume = async (req, res) => {
       });
     }
 
-    // limit length
     const MAX_CHARS = 18000;
     resumeText =
       resumeText.length > MAX_CHARS
         ? resumeText.slice(0, MAX_CHARS) + "\n...[truncated]"
         : resumeText;
 
-    // call LLM
     const llmText = await buildPromptAndCallLLM({ resumeText, jobDescription });
 
-    // try parse
     let parsed = null;
     try {
       parsed = parseLLMJson(llmText);
     } catch (parseError) {
-      // Return helpful debug info
       return res.status(502).json({
         error: "LLM JSON parse error",
         llm_raw: llmText,
@@ -126,34 +116,28 @@ const analyzeResume = async (req, res) => {
       });
     }
 
-    // Attempt to validate
     try {
       const validated = ResponseSchema.parse(parsed);
 
-      // Normalize skills
       validated.matched_skills = validated.matched_skills.map(normalizeSkill);
       validated.missing_skills = validated.missing_skills.map(normalizeSkill);
 
-      // Compute server score for cross-check and add to response
       const serverScore = computeServerScore(
         validated.matched_skills,
         validated.missing_skills
       );
-      // If LLM score deviates a lot, include both and prefer serverScore for consistency
       const diff = Math.abs((validated.match_score || 0) - serverScore);
       const result = {
         ...validated,
         server_match_score: serverScore,
         llm_raw: llmText,
       };
-      // Optionally replace match_score if LLM is weird:
       if (diff > 20)
         result.note =
           "Server computed match_score differs significantly from LLM; prefer server_match_score";
 
       return res.json({ success: true, result });
     } catch (zErr) {
-      // If schema mismatch: attempt 1 repair call to the model with previous raw output and a schema hint
       const schemaHint = `{"match_score":number,"matched_skills":[string],"missing_skills":[string],"suggestions":string}`;
       const repairPrompt = makeRepairPrompt({
         previousOutput: llmText,
@@ -165,7 +149,6 @@ const analyzeResume = async (req, res) => {
           resumeText: repairPrompt,
           jobDescription: "",
         });
-        // try parse repaired
         const repairedParsed = parseLLMJson(repairedText);
         const repairedValidated = ResponseSchema.parse(repairedParsed);
 
@@ -193,7 +176,6 @@ const analyzeResume = async (req, res) => {
 
         return res.json({ success: true, result });
       } catch (repairErr) {
-        // final failure: return debug info
         return res.status(502).json({
           error: "Invalid LLM output (schema mismatch) and repair failed",
           llm_raw: llmText,
@@ -204,9 +186,19 @@ const analyzeResume = async (req, res) => {
     }
   } catch (error) {
     console.error("analyzeResume error:", error);
+    const isOverload =
+      error?.status === 503 ||
+      (error?.message && error.message.toLowerCase().includes("overload"));
+    if (isOverload) {
+      return res
+        .status(503)
+        .json({
+          error: "Model overloaded. Try again shortly.",
+          retry_after_seconds: 10,
+        });
+    }
     return res.status(500).json({ error: String(error.message || error) });
   } finally {
-    // cleanup upload if still present
     try {
       if (uploadedPath && fs.existsSync(uploadedPath))
         fs.unlinkSync(uploadedPath);
