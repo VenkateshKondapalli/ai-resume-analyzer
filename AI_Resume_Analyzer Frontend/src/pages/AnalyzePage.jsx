@@ -5,6 +5,13 @@ import { ErrorAlert } from "../components/ErrorAlert";
 import { ResultCard } from "../components/ResultCard";
 
 const AnalyzePage = () => {
+  // ---------- State ----------
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [showRawOutput, setShowRawOutput] = useState(false);
+
+  // ---------- Error Mapping ----------
   const getFriendlyErrorMessage = (err) => {
     const status = err?.response?.status;
 
@@ -23,26 +30,18 @@ const AnalyzePage = () => {
     return "Something went wrong. Please try again later.";
   };
 
-  const [analysisResult, setAnalysisResult] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const [showRawOutput, setShowRawOutput] = useState(false);
-
+  // ---------- Centralized Error Handler ----------
   const handleError = (err) => {
-    console.error("Analyze error:", err);
+    console.error("FULL ERROR OBJECT:", err);
     const message = getFriendlyErrorMessage(err);
-    setError(message);
+    setErrorMessage(message);
   };
 
+  // ---------- UI Switch ----------
   const renderContent = () => {
-    if (isLoading) {
-      return <LoadingIndicator />;
-    }
-    if (error) {
-      return <ErrorAlert message={error} />;
-    }
-    if (analysisResult) {
+    if (isLoading) return <LoadingIndicator />;
+    if (errorMessage) return <ErrorAlert message={errorMessage} />;
+    if (analysisResult)
       return (
         <ResultCard
           result={analysisResult}
@@ -50,7 +49,7 @@ const AnalyzePage = () => {
           rawOutputData={analysisResult}
         />
       );
-    }
+
     return (
       <p className="text-center text-gray-500 mt-8">
         Enter a resume and job description above to begin the analysis.
@@ -58,23 +57,24 @@ const AnalyzePage = () => {
     );
   };
 
+  // ---------- Render ----------
   return (
     <div className="py-12 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
         Resume Analyzer
       </h1>
-      <div>
-        <ResumeForm
-          setAnalysisResult={setAnalysisResult}
-          setIsLoading={setIsLoading}
-          setError={handleError}
-          isFormDisabled={isLoading}
-        />
-      </div>
+
+      <ResumeForm
+        setAnalysisResult={setAnalysisResult}
+        setIsLoading={setIsLoading}
+        setError={handleError}
+        clearError={() => setErrorMessage(null)}
+        isFormDisabled={isLoading}
+      />
 
       {analysisResult && (
         <div className="flex justify-center mt-6">
-          <label className="flex items-center space-x-2 text-sm font-medium text-gray-600 cursor-pointer">
+          <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
             <input
               type="checkbox"
               checked={showRawOutput}
