@@ -1,4 +1,4 @@
-const MatchScore = (score) => {
+const MatchScore = ({ score }) => {
   let colorClass = "text-gray-600 border-gray-400";
   let ringColor = "ring-gray-400";
 
