@@ -1,56 +1,68 @@
 import { useState } from "react";
 import { ResumeForm } from "../components/ResumeForm";
+import { LoadingIndicator } from "../components/LoadingIndicator";
+import { ErrorAlert } from "../components/ErrorAlert";
+import { ResultCard } from "../components/ResultCard";
 
 const AnalyzePage = () => {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [showRawOutput, setShowRawOutput] = useState(false);
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <LoadingIndicator />;
+    }
+    if (error) {
+      return <ErrorAlert message={error} />;
+    }
+    if (analysisResult) {
+      return (
+        <ResultCard
+          result={analysisResult}
+          showRawOutput={showRawOutput}
+          rawOutputData={analysisResult}
+        />
+      );
+    }
+    return (
+      <p className="text-center text-gray-500 mt-8">
+        Enter a resume and job description above to begin the analysis.
+      </p>
+    );
+  };
+
   return (
     <div className="py-12 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
         Resume Analyzer
       </h1>
-
-      <div className="px-4">
-        {/* Pass state setters to the form component */}
+      <div>
         <ResumeForm
           setAnalysisResult={setAnalysisResult}
           setIsLoading={setIsLoading}
           setError={setError}
+          isFromDisabled={isLoading}
         />
       </div>
 
-      {/* Status Display Area */}
-      <div className="mt-10 max-w-4xl mx-auto px-4">
-        {isLoading && (
-          <div className="text-center text-indigo-600 text-lg">
-            {/* Placeholder for actual spinner (Task 12) */}
-            Analyzing resume... Please wait.
-          </div>
-        )}
+      {analysisResult && (
+        <div className="flex justify-center mt-6">
+          <label className="flex items-center space-x-2 text-sm font-medium text-gray-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showRawOutput}
+              onChange={() => setShowRawOutput(!showRawOutput)}
+              className="form-checkbox h-4 w-4 text-indigo-600 rounded"
+            />
+            <span>Show Debug Raw Output (JSON)</span>
+          </label>
+        </div>
+      )}
 
-        {error && (
-          <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            Error: {error}
-          </div>
-        )}
-
-        {/* For now, display the raw JSON result in the console (Task 9 Checkpoint) */}
-        {analysisResult && (
-          <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">
-              Analysis Checkpoint Result:
-            </h2>
-            <pre className="whitespace-pre-wrap text-sm">
-              {JSON.stringify(analysisResult, null, 2)}
-            </pre>
-            <p className="mt-2 text-green-600">
-              Successfully received structured JSON from the backend!
-            </p>
-          </div>
-        )}
-      </div>
+      <div className="mt-10 px-4">{renderContent()}</div>
     </div>
   );
 };
