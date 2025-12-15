@@ -10,10 +10,6 @@ const MAX_RETRIES = Number(process.env.GENAI_MAX_RETRIES || 3);
 const INITIAL_DELAY_MS = Number(process.env.GENAI_INITIAL_DELAY_MS || 600);
 const MAX_OUTPUT_TOKENS = Number(process.env.GENAI_MAX_OUTPUT_TOKENS || 1600);
 
-// ---------------------
-// Helper functions
-// ---------------------
-
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -165,17 +161,30 @@ async function callWithRetryAndFallback(prompt, opts = {}) {
 function makePrompt({ resumeText, jobDescription }) {
   return `
 You are an expert resume screening assistant.
-Return ONLY valid JSON exactly in this schema:
+
+Your task is to analyze a resume against a job description and return a structured evaluation.
+
+STRICT RULES (must follow exactly):
+- Return ONLY a single valid JSON object
+- Do NOT include markdown, backticks, code fences, or explanations
+- Do NOT add extra keys outside the schema
+- Do NOT include comments or trailing text
+
+JSON SCHEMA:
 {"match_score":number,"matched_skills":[string],"missing_skills":[string],"suggestions":string}
 
-RESUME:
+MATCH_SCORE RULES:
+- 0 means no match at all
+- 100 means perfect match
+- Base the score on skills relevance and overlap only
+
+RESUME TEXT:
 ${resumeText}
 
 JOB DESCRIPTION:
 ${jobDescription}
 
-Return ONLY the JSON object.
-`;
+Return ONLY the JSON object.`;
 }
 
 function makeRepairPrompt({ previousOutput, schemaHint }) {
@@ -191,10 +200,6 @@ ${previousOutput}
 Return ONLY a corrected JSON object.
 `;
 }
-
-// ---------------------
-// Main exported function
-// ---------------------
 
 async function buildPromptAndCallLLM({ resumeText, jobDescription }) {
   const prompt = makePrompt({ resumeText, jobDescription });

@@ -120,6 +120,7 @@ const analyzeResume = async (req, res) => {
 
         return res.json({ success: true, result });
       } catch (repairErr) {
+        console.warn("LLM RAW OUTPUT (parse failed):", llmText);
         return res.status(502).json({
           error: "Invalid LLM output and repair failed",
           llm_raw: llmText,

@@ -23,13 +23,90 @@ function normalizeSkill(s) {
   return SKILL_NORMALIZE[sClean] || s.trim();
 }
 
-function parseLLMJson(text) {
+function parseLLMJson(llmText) {
+  if (!llmText || typeof llmText !== "string")
+    throw new Error("Empty LLM output");
+
+  let cleaned = llmText.trim();
+
+  // Strip triple code fences (``` or ~~~) and optional language tag (e.g., json)
+  if (
+    (cleaned.startsWith("```") && cleaned.endsWith("```")) ||
+    (cleaned.startsWith("~~~") && cleaned.endsWith("~~~"))
+  ) {
+    const firstBreak = cleaned.indexOf("\n");
+    if (firstBreak !== -1 && cleaned.slice(0, firstBreak).match(/^(```|~~~)/)) {
+      cleaned = cleaned.slice(firstBreak + 1, cleaned.length - 3).trim();
+    } else {
+      cleaned = cleaned
+        .replace(/^(```|~~~)/, "")
+        .replace(/(```|~~~)$/, "")
+        .trim();
+    }
+  }
+
+  // Remove single backticks
+  if (cleaned.startsWith("`") && cleaned.endsWith("`")) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  // Quick try: parse directly if clean
   try {
-    return JSON.parse(text);
-  } catch {
-    const match = text.match(/\{[\s\S]*\}$/);
-    if (match) return JSON.parse(match[0]);
-    throw new Error("Invalid JSON from LLM");
+    return JSON.parse(cleaned);
+  } catch (err) {
+    // Continue to brace counting if direct parse fails
+  }
+
+  // Find first balanced JSON object using brace counting
+  const start = cleaned.indexOf("{");
+  if (start === -1) throw new Error("No JSON object found in LLM output");
+
+  let depth = 0;
+  let inString = false;
+  let escapeNext = false;
+  let endIndex = -1;
+
+  for (let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+    if (ch === "\\") {
+      escapeNext = true;
+      continue;
+    }
+
+    // String detection handling single/double quotes
+    if (ch === '"' || ch === "'") {
+      if (!inString) inString = ch;
+      else if (inString === ch) inString = false;
+      continue;
+    }
+    if (inString) continue;
+
+    // Brace counting for object boundaries
+    if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        endIndex = i;
+        break;
+      }
+    }
+  }
+
+  if (endIndex === -1)
+    throw new Error("Could not find balanced JSON object in LLM output");
+
+  const jsonSubstr = cleaned.slice(start, endIndex + 1);
+  try {
+    return JSON.parse(jsonSubstr);
+  } catch (parseErr) {
+    throw new Error(
+      `Invalid JSON from LLM (extracted snippet): ${parseErr.message}`
+    );
   }
 }
 
