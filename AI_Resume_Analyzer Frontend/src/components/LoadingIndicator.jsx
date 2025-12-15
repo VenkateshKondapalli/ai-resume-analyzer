@@ -1,6 +1,4 @@
-// src/components/LoadingIndicator.jsx
 import React from "react";
-
 const LoadingIndicator = () => {
   return (
     <div className="flex flex-col items-center justify-center p-10 space-y-6 max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-indigo-100">
