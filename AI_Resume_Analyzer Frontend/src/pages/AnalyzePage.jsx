@@ -5,11 +5,35 @@ import { ErrorAlert } from "../components/ErrorAlert";
 import { ResultCard } from "../components/ResultCard";
 
 const AnalyzePage = () => {
+  const getFriendlyErrorMessage = (err) => {
+    const status = err?.response?.status;
+
+    if (status === 400) {
+      return "Please check your resume or job description and try again.";
+    }
+
+    if (status === 502) {
+      return "AI failed to generate a valid response. Please try again.";
+    }
+
+    if (status === 503) {
+      return "AI is currently overloaded. Please wait a few seconds and retry.";
+    }
+
+    return "Something went wrong. Please try again later.";
+  };
+
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const [showRawOutput, setShowRawOutput] = useState(false);
+
+  const handleError = (err) => {
+    console.error("Analyze error:", err);
+    const message = getFriendlyErrorMessage(err);
+    setError(message);
+  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -43,8 +67,8 @@ const AnalyzePage = () => {
         <ResumeForm
           setAnalysisResult={setAnalysisResult}
           setIsLoading={setIsLoading}
-          setError={setError}
-          isFromDisabled={isLoading}
+          setError={handleError}
+          isFormDisabled={isLoading}
         />
       </div>
 
