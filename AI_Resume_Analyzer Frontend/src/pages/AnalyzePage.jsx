@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ResumeForm } from "../components/ResumeForm";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ErrorAlert } from "../components/ErrorAlert";
@@ -10,6 +10,8 @@ const AnalyzePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [showRawOutput, setShowRawOutput] = useState(false);
+
+  const formSubmitRef = useRef(null);
 
   // ---------- Error Mapping ----------
   const getFriendlyErrorMessage = (err) => {
@@ -37,10 +39,23 @@ const AnalyzePage = () => {
     setErrorMessage(message);
   };
 
+  const handleRetry = () => {
+    if (formSubmitRef.current && formSubmitRef.current.triggerSubmit) {
+      formSubmitRef.current.triggerSubmit();
+    } else {
+      console.warn("Cannot retry submission: Form handler not yet ready.");
+    }
+  };
+
+  const handleFormReady = (handlers) => {
+    formSubmitRef.current = handlers;
+  };
+
   // ---------- UI Switch ----------
   const renderContent = () => {
     if (isLoading) return <LoadingIndicator />;
-    if (errorMessage) return <ErrorAlert message={errorMessage} />;
+    if (errorMessage)
+      return <ErrorAlert message={errorMessage} onRetry={handleRetry} />;
     if (analysisResult)
       return (
         <ResultCard
@@ -70,6 +85,7 @@ const AnalyzePage = () => {
         setError={handleError}
         clearError={() => setErrorMessage(null)}
         isFormDisabled={isLoading}
+        onDataReady={handleFormReady}
       />
 
       {analysisResult && (

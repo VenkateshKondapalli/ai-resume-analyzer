@@ -2,7 +2,7 @@ import { MatchScore } from "./MatchScore";
 import { SkillsList } from "./SkillsList";
 import { Suggestions } from "./Suggestions";
 
-const ResultCard = ({ result }) => {
+const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
   const { match_score, matched_skills, missing_skills, suggestions } = result;
 
   return (
@@ -24,6 +24,18 @@ const ResultCard = ({ result }) => {
       <div>
         <Suggestions text={suggestions} />
       </div>
+
+      {showRawOutput && rawOutputData && (
+        <details className="mt-8 bg-gray-50 border border-gray-300 rounded-lg p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-gray-700">
+            🔍 Debug Raw Output (JSON)
+          </summary>
+
+          <pre className="mt-4 max-h-96 overflow-auto text-xs bg-black text-green-300 p-4 rounded-md">
+            {JSON.stringify(rawOutputData, null, 2)}
+          </pre>
+        </details>
+      )}
     </div>
   );
 };

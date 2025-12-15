@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { analyzeResume } from "../api/analyze";
+import { useCallback, useEffect } from "react";
 
 const ResumeForm = ({
   setAnalysisResult,
@@ -7,53 +8,66 @@ const ResumeForm = ({
   setError,
   clearError,
   isFormDisabled,
+  onDataReady,
 }) => {
   const {
     register,
     handleSubmit,
     watch,
+    getValues,
     formState: { errors },
   } = useForm();
 
+  const onSubmit = useCallback(
+    async (data) => {
+      const hasFile = data.resumeFile && data.resumeFile.length > 0;
+      const hasText = data.resumeText && data.resumeText.trim() !== "";
+
+      if (!hasFile && !hasText) {
+        alert("Please provide either a Resume File or paste Resume Text.");
+        return;
+      }
+
+      const payload = {
+        jobDescription: data.jobDescription,
+        resumeFile: hasFile ? data.resumeFile[0] : null,
+        resumeText: hasFile ? null : data.resumeText,
+      };
+
+      setIsLoading(true);
+      clearError();
+      setAnalysisResult(null);
+
+      try {
+        const result = await analyzeResume(payload);
+
+        if (result?.success && result?.result) {
+          setAnalysisResult(result.result);
+          clearError();
+        } else {
+          throw new Error("Unexpected API response");
+        }
+      } catch (err) {
+        console.error("analyze error:", err);
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setIsLoading, clearError, setAnalysisResult, setError]
+  );
+
+  useEffect(() => {
+    if (onDataReady) {
+      onDataReady({
+        triggerSubmit: () => handleSubmit(onSubmit)(),
+        getFormData: getValues,
+      });
+    }
+  }, [onDataReady, handleSubmit, getValues, onSubmit]);
+
   const watchedFile = watch("resumeFile");
   const watchedText = watch("resumeText");
-
-  const onSubmit = async (data) => {
-    const hasFile = data.resumeFile && data.resumeFile.length > 0;
-    const hasText = data.resumeText && data.resumeText.trim() !== "";
-
-    if (!hasFile && !hasText) {
-      alert("Please provide either a Resume File or paste Resume Text.");
-      return;
-    }
-
-    const payload = {
-      jobDescription: data.jobDescription,
-      resumeFile: hasFile ? data.resumeFile[0] : null,
-      resumeText: hasFile ? null : data.resumeText,
-    };
-
-    // ---------- Reset State ----------
-    setIsLoading(true);
-    clearError();
-    setAnalysisResult(null);
-
-    try {
-      const result = await analyzeResume(payload);
-
-      if (result?.success && result?.result) {
-        setAnalysisResult(result.result);
-        clearError();
-      } else {
-        throw new Error("Unexpected API response");
-      }
-    } catch (err) {
-      console.error("analyze error:", err);
-      setError(err); // ⬅️ raw AxiosError forwarded
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const isFileSelected = watchedFile && watchedFile.length > 0;
   const isTextPasted = watchedText && watchedText.trim() !== "";
