@@ -11,6 +11,7 @@ const {
 } = require("../../services/scoringService");
 
 const { extractResumeText } = require("../../services/resumeParser");
+const { extractSkillsFromText } = require("../../services/skillExtractor");
 
 // -------------------------
 // Main Controller Function
