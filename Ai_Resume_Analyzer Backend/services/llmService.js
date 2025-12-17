@@ -10,74 +10,43 @@ const MAX_RETRIES = Number(process.env.GENAI_MAX_RETRIES || 3);
 const INITIAL_DELAY_MS = Number(process.env.GENAI_INITIAL_DELAY_MS || 600);
 const MAX_OUTPUT_TOKENS = Number(process.env.GENAI_MAX_OUTPUT_TOKENS || 1600);
 
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
+// ---------------------
+// Utils
+// ---------------------
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const jitter = (delay) => delay + Math.floor(Math.random() * delay * 0.2);
 
-function jitter(delay) {
-  return delay + Math.floor(Math.random() * Math.floor(delay * 0.2));
-}
-
-// Determine if LLM error is temporary and retriable
 function isTransientError(err) {
-  if (!err) return false;
-
   const status = err?.status || err?.response?.status || err?.code;
   if (status === 429 || status === 503) return true;
 
   const msg = String(err?.message || "").toLowerCase();
-  if (
+  return (
     msg.includes("overload") ||
     msg.includes("rate limit") ||
-    msg.includes("timed out")
-  )
-    return true;
-
-  if (
-    err?.code === "ECONNABORTED" ||
-    err?.code === "ECONNRESET" ||
-    err?.code === "ENOTFOUND"
-  )
-    return true;
-
-  return false;
+    msg.includes("timeout") ||
+    ["ECONNRESET", "ECONNABORTED", "ENOTFOUND"].includes(err?.code)
+  );
 }
 
-// Retry wrapper
-async function retryWithBackoff(
-  fn,
-  retries = MAX_RETRIES,
-  base = INITIAL_DELAY_MS
-) {
+async function retryWithBackoff(fn) {
   let lastErr;
-
-  for (let i = 0; i <= retries; i++) {
+  for (let i = 0; i <= MAX_RETRIES; i++) {
     try {
       return await fn();
     } catch (err) {
       lastErr = err;
-      if (!isTransientError(err)) throw err;
-      if (i === retries) break;
-
-      const wait = jitter(base * Math.pow(2, i));
-      console.warn(
-        `Transient LLM error on attempt ${
-          i + 1
-        }/${retries}. Retrying after ${wait}ms`,
-        err?.message || err
-      );
-      await sleep(wait);
+      if (!isTransientError(err) || i === MAX_RETRIES) break;
+      await sleep(jitter(INITIAL_DELAY_MS * Math.pow(2, i)));
     }
   }
-
   throw lastErr;
 }
 
-// Make one call to Gemini
-async function callGeminiOnce(
-  prompt,
-  { model, temperature = 0.0, maxOutputTokens = MAX_OUTPUT_TOKENS } = {}
-) {
+// ---------------------
+// Core Gemini Call
+// ---------------------
+async function callGeminiOnce(prompt, { model, temperature, maxOutputTokens }) {
   const response = await ai.models.generateContent({
     model,
     contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -85,134 +54,72 @@ async function callGeminiOnce(
     maxOutputTokens,
   });
 
-  // handle direct text
-  if (typeof response?.text === "string" && response.text.trim()) {
-    return response.text.trim();
-  }
+  const text =
+    response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-  // try SDK structures
-  const candidate = response?.candidates?.[0] || response?.output?.[0] || null;
-  const textA = candidate?.content?.parts?.[0]?.text;
-  const textB = candidate?.content?.[0]?.text;
-  const textC = candidate?.output?.[0]?.content;
-  const textD = candidate?.text;
-
-  const generated = textA || textB || textC || textD;
-
-  if (generated && generated.trim()) return generated.trim();
-
-  console.error(
-    "Unexpected Gemini response:",
-    JSON.stringify(response, null, 2)
-  );
-  throw new Error("Empty or unexpected response shape from Gemini");
+  if (!text) throw new Error("Empty response from Gemini");
+  return text.trim();
 }
 
-// Primary → fallback calling logic
 async function callWithRetryAndFallback(prompt, opts = {}) {
-  const modelPrimary = opts.model || PRIMARY_MODEL;
-
   try {
-    return await retryWithBackoff(
-      () =>
-        callGeminiOnce(prompt, {
-          model: modelPrimary,
-          temperature: opts.temperature || 0.0,
-          maxOutputTokens: opts.maxOutputTokens || MAX_OUTPUT_TOKENS,
-        }),
-      MAX_RETRIES,
-      INITIAL_DELAY_MS
+    return await retryWithBackoff(() =>
+      callGeminiOnce(prompt, {
+        model: opts.model || PRIMARY_MODEL,
+        temperature: opts.temperature ?? 0.0,
+        maxOutputTokens: opts.maxOutputTokens || MAX_OUTPUT_TOKENS,
+      })
     );
-  } catch (primaryErr) {
-    console.warn("Primary model failed:", primaryErr?.message || primaryErr);
+  } catch (err) {
+    if (!FALLBACK_MODEL) throw err;
 
-    if (!FALLBACK_MODEL || FALLBACK_MODEL === modelPrimary) throw primaryErr;
-
-    try {
-      const fallbackRetries = Math.max(1, Math.floor(MAX_RETRIES / 2));
-      return await retryWithBackoff(
-        () =>
-          callGeminiOnce(prompt, {
-            model: FALLBACK_MODEL,
-            temperature: opts.temperature || 0.0,
-            maxOutputTokens: opts.maxOutputTokens || MAX_OUTPUT_TOKENS,
-          }),
-        fallbackRetries,
-        INITIAL_DELAY_MS
-      );
-    } catch (fallbackErr) {
-      console.error(
-        "Fallback model also failed:",
-        fallbackErr?.message || fallbackErr
-      );
-
-      const err = new Error("Both primary and fallback LLM calls failed");
-      err.primary = primaryErr;
-      err.fallback = fallbackErr;
-      throw err;
-    }
+    return await retryWithBackoff(() =>
+      callGeminiOnce(prompt, {
+        model: FALLBACK_MODEL,
+        temperature: opts.temperature ?? 0.0,
+        maxOutputTokens: opts.maxOutputTokens || MAX_OUTPUT_TOKENS,
+      })
+    );
   }
 }
 
-// ---------------------
-// Prompt Builders
-// ---------------------
-
+// ======================================================
+// PHASE 2 — Resume Analysis (JSON, STRUCTURED)
+// ======================================================
 function makePrompt({ resumeText, jobDescription }) {
   return `
-You are an expert resume screening assistant.
+Return ONLY valid JSON.
 
-Your task is to analyze a resume against a job description and return a structured evaluation.
-
-STRICT RULES (must follow exactly):
-- Return ONLY a single valid JSON object
-- Do NOT include markdown, backticks, code fences, or explanations
-- Do NOT add extra keys outside the schema
-- Do NOT include comments or trailing text
-
-JSON SCHEMA:
+Schema:
 {"match_score":number,"matched_skills":[string],"missing_skills":[string],"suggestions":string}
 
-MATCH_SCORE RULES:
-- 0 means no match at all
-- 100 means perfect match
-- Base the score on skills relevance and overlap only
-
-RESUME TEXT:
+RESUME:
 ${resumeText}
 
 JOB DESCRIPTION:
 ${jobDescription}
-
-Return ONLY the JSON object.`;
-}
-
-function makeRepairPrompt({ previousOutput, schemaHint }) {
-  return `
-The previous response did not match schema. Fix it.
-
-Schema:
-${schemaHint}
-
-Incorrect JSON:
-${previousOutput}
-
-Return ONLY a corrected JSON object.
 `;
 }
 
 async function buildPromptAndCallLLM({ resumeText, jobDescription }) {
+  console.log("❌ buildPromptAndCallLLM USED");
   const prompt = makePrompt({ resumeText, jobDescription });
-
   return await callWithRetryAndFallback(prompt, {
-    model: PRIMARY_MODEL,
     temperature: 0.0,
-    maxOutputTokens: MAX_OUTPUT_TOKENS,
+  });
+}
+
+// ======================================================
+// PHASE 4+ — Explanation Only (PLAIN TEXT)
+// ======================================================
+async function callLLMWithPrompt(prompt) {
+  console.log("🔥 callLLMWithPrompt USED");
+  return await callWithRetryAndFallback(prompt, {
+    temperature: 0.2,
   });
 }
 
 module.exports = {
-  buildPromptAndCallLLM,
-  makePrompt,
-  makeRepairPrompt,
+  buildPromptAndCallLLM, // Phase 2
+  callLLMWithPrompt, // Phase 4+
 };

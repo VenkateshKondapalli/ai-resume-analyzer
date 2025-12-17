@@ -1,4 +1,6 @@
-const { buildPromptAndCallLLM } = require("../llmService");
+// const { buildPromptAndCallLLM } = require("../llmService");
+
+const { callLLMWithPrompt } = require("../llmService");
 
 const buildExplanationPrompt = ({
   match_score,
@@ -32,9 +34,11 @@ Return a concise, professional explanation in plain text.
 };
 
 const generateExplanation = async (skillResult) => {
+  console.log("🟢 generateExplanation called");
   try {
     const prompt = buildExplanationPrompt(skillResult);
-    const response = await buildPromptAndCallLLM(prompt);
+    console.log("🟢 Explanation prompt:\n", prompt);
+    const response = await callLLMWithPrompt(prompt);
     return response;
   } catch (err) {
     console.error("LLM explanation failed:", err.message);
