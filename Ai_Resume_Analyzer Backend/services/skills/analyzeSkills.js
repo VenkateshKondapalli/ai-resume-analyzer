@@ -63,10 +63,3 @@ const validateSkillResult = (result) => {
 };
 
 module.exports = { analyzeSkills };
-
-const test = analyzeSkills(
-  "Experienced backend developer with strong knowledge of Node.js and Express.js.Worked extensively with MongoDB and RESTful APIs.Built scalable applications using containerization and cloud services.Comfortable with JavaScript and Git-based workflows.",
-  "We are looking for a Backend Engineer with experience in Node.js, Express.js,JavaScript, MongoDB, Docker, REST APIs, and AWS."
-);
-
-console.log(test);
