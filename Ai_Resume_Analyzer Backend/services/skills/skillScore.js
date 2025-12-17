@@ -14,10 +14,10 @@ const computeSkillScore = (matchedSkills = [], missingSkills = []) => {
   }
 
   const rawScore = (mCount / totalCount) * 100;
-  const score = Math.min(100, Math.max(0, Math.round(rawScore)));
+  const match_score = Math.min(100, Math.max(0, Math.round(rawScore)));
 
   return {
-    score: score,
+    match_score: match_score,
     matchedCount: mCount,
     missingCount: misCount,
     totalCount: totalCount,
