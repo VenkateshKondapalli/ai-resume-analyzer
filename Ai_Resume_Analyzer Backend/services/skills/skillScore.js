@@ -1,26 +1,33 @@
-const computeSkillScore = (matchedSkills = [], missingSkills = []) => {
-  const mCount = Array.isArray(matchedSkills) ? matchedSkills.length : 0;
-  const misCount = Array.isArray(missingSkills) ? missingSkills.length : 0;
+const { getSkillWeight } = require("./skillWeights");
 
-  const totalCount = mCount + misCount;
+const computeSkillScore = (
+  matchedSkills = [],
+  missingSkills = [],
+  partialMatchedSkills = []
+) => {
+  let matchedWeight = 0;
+  let totalWeight = 0;
 
-  if (totalCount === 0) {
-    return {
-      score: 0,
-      matchedCount: 0,
-      missingCount: 0,
-      totalCount: 0,
-    };
-  }
+  matchedSkills.forEach((s) => {
+    const w = getSkillWeight(s);
+    matchedWeight += w;
+    totalWeight += w;
+  });
 
-  const rawScore = (mCount / totalCount) * 100;
-  const match_score = Math.min(100, Math.max(0, Math.round(rawScore)));
+  partialMatchedSkills.forEach((s) => {
+    const w = getSkillWeight(s);
+    matchedWeight += w * 0.5;
+    totalWeight += w;
+  });
+
+  missingSkills.forEach((s) => {
+    totalWeight += getSkillWeight(s);
+  });
+
+  if (totalWeight === 0) return { match_score: 0 };
 
   return {
-    match_score: match_score,
-    matchedCount: mCount,
-    missingCount: misCount,
-    totalCount: totalCount,
+    match_score: Math.round((matchedWeight / totalWeight) * 100),
   };
 };
 

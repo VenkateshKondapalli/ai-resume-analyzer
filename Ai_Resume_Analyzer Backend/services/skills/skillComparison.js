@@ -1,33 +1,36 @@
+const { getPartialMatches } = require("./partialMatchMap");
+
 const skillComparison = (resumeSkills, jobSkills) => {
-  const emptyResult = {
-    matchedSkills: [],
-    missingSkills: [],
-  };
+  const resumeSet = new Set((resumeSkills || []).map((s) => s.toLowerCase()));
 
-  const cleanResumeSkills = Array.isArray(resumeSkills) ? resumeSkills : [];
-  const cleanJobSkills = Array.isArray(jobSkills) ? jobSkills : [];
+  const matchedSkills = new Set();
+  const partialMatchedSkills = new Set();
+  const missingSkills = new Set();
 
-  if (cleanResumeSkills.length === 0 && cleanJobSkills.length === 0) {
-    return emptyResult;
-  }
+  for (const jobSkill of jobSkills || []) {
+    const jobLower = jobSkill.toLowerCase();
 
-  const resumeSet = new Set(cleanResumeSkills.map((s) => s.toLowerCase()));
+    // 1️⃣ Exact match
+    if (resumeSet.has(jobLower)) {
+      matchedSkills.add(jobSkill);
+      continue;
+    }
 
-  const matchedSkillsSet = new Set();
-  const missingSkillsSet = new Set();
+    // 2️⃣ Partial match
+    const partials = getPartialMatches(jobSkill);
+    const foundPartial = partials.some((p) => resumeSet.has(p.toLowerCase()));
 
-  for (const jobSkill of cleanJobSkills) {
-    const lowerJobSkill = jobSkill.toLowerCase();
-    if (resumeSet.has(lowerJobSkill)) {
-      matchedSkillsSet.add(jobSkill);
+    if (foundPartial) {
+      partialMatchedSkills.add(jobSkill);
     } else {
-      missingSkillsSet.add(jobSkill);
+      missingSkills.add(jobSkill);
     }
   }
 
   return {
-    matchedSkills: Array.from(matchedSkillsSet).sort(),
-    missingSkills: Array.from(missingSkillsSet).sort(),
+    matchedSkills: [...matchedSkills],
+    partialMatchedSkills: [...partialMatchedSkills],
+    missingSkills: [...missingSkills],
   };
 };
 
