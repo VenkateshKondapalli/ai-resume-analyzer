@@ -26,14 +26,3 @@ const generateRoadmap = async ({ missingSkills, role }) => {
 };
 
 module.exports = { generateRoadmap };
-
-const missingSkills = ["AWS"];
-const role = "Backend Developer";
-
-generateRoadmap({ missingSkills, role })
-  .then((result) => {
-    console.log(JSON.stringify(result, null, 2));
-  })
-  .catch((err) => {
-    console.error(err);
-  });
