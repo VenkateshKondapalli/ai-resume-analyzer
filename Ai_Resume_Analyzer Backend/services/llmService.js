@@ -1,8 +1,14 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("❌ GEMINI_API_KEY is missing in .env");
+}
+
 const { GoogleGenAI } = require("@google/genai");
-const ai = new GoogleGenAI({});
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
 const PRIMARY_MODEL = process.env.GENAI_PRIMARY_MODEL || "gemini-2.5-flash";
 const FALLBACK_MODEL = process.env.GENAI_FALLBACK_MODEL || "";
