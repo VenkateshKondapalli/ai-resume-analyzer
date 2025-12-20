@@ -1,0 +1,5 @@
+Backend Developer roles in 2025 require AWS experience including:
+- Deploying Node.js applications on EC2
+- Using S3 for static assets and backups
+- IAM roles and policies
+- Basic CI/CD with AWS services
