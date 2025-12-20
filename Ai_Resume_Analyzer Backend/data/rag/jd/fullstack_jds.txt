@@ -1,0 +1,14 @@
+Full Stack Developer - Product Team
+Requirements:
+- Strong Node.js backend experience combined with React.js frontend skills.
+- Experience building end-to-end features from DB schema to UI.
+- Proficiency in CSS-in-JS libraries or Tailwind CSS.
+- Understanding of state management (Redux or Zustand).
+- Ability to manage full-stack deployments on platforms like Vercel or Heroku.
+
+Lead Full Stack Engineer
+Requirements:
+- Expert-level Node.js and Express for high-traffic APIs.
+- Mastery of modern frontend frameworks (React, Vue, or Next.js).
+- Experience with full-stack testing strategies (Cypress/Playwright).
+- Knowledge of SSR (Server Side Rendering) and SSG (Static Site Generation).

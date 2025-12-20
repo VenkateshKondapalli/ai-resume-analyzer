@@ -1,0 +1,22 @@
+Cloud Backend Engineer - AWS Focus
+Requirements:
+- Heavy experience deploying Node.js services on AWS (EC2, S3, RDS).
+- Mastery of AWS Lambda and Serverless Framework.
+- Experience with IAM roles, VPCs, and cloud security.
+- Infrastructure as Code (IaC) experience using Terraform or AWS CDK.
+- Knowledge of cloud monitoring tools like CloudWatch.
+
+DevOps-Oriented Backend Developer
+Requirements:
+- Strong Node.js experience with a focus on containerization.
+- Mastery of Docker: Writing efficient Dockerfiles and using Docker Compose.
+- Experience with container orchestration (Kubernetes or AWS ECS).
+- Building and maintaining CI/CD pipelines (GitHub Actions, GitLab CI).
+- Understanding of Linux server administration and shell scripting.
+
+Site Reliability Engineer (SRE) - Backend
+Requirements:
+- Node.js proficiency for automation and backend tooling.
+- Expertise in AWS networking and load balancing (ALB/ELB).
+- Hands-on Docker experience for consistent environment management.
+- Experience with logging and observability (ELK Stack, Datadog).

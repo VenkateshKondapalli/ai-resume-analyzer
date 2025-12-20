@@ -1,0 +1,22 @@
+Backend Developer - Enterprise Systems
+Requirements:
+- Mastery of Node.js and the Express.js ecosystem.
+- Deep understanding of RESTful API design and implementation.
+- Proficiency with SQL (Postgres/MySQL) and NoSQL (MongoDB/Redis) databases.
+- Strong knowledge of asynchronous programming and event-driven architecture.
+- Experience with Unit and Integration testing using Jest.
+
+Senior Node.js Engineer - Platform Team
+Requirements:
+- 5+ years building scalable backend services in Node.js.
+- Expertise in TypeScript and ES6+ standards.
+- Experience with message brokers like RabbitMQ or Kafka.
+- Hands-on experience with microservices architecture.
+- Knowledge of OAuth2, JWT, and security best practices.
+
+Software Engineer - Backend Integration
+Requirements:
+- Professional experience with Node.js and NestJS.
+- Ability to optimize complex database queries for performance.
+- Familiarity with GraphQL and Apollo Server.
+- Strong debugging and profiling skills for server-side code.
