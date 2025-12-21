@@ -23,7 +23,11 @@ const analyzeResume = async (req, res) => {
     }
 
     // 1️⃣ RULE-BASED SKILL ANALYSIS (SOURCE OF TRUTH)
-    const skillResult = analyzeSkills(resumeText, jobDescription);
+    const skillResult = analyzeSkills(
+      resumeText,
+      jobDescription,
+      (options = {})
+    );
     console.log("Skill Analysis Result:", skillResult);
 
     // 2️⃣ LLM EXPLANATION (READ-ONLY)
