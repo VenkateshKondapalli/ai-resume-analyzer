@@ -2,8 +2,8 @@ const { buildRoadmapSkeleton } = require("./roadmap.engine");
 const { buildRoadmapPrompt } = require("./roadmap.prompt");
 const { generateSkillRoadmap } = require("./roadmap.llm");
 
-const generateRoadmap = async ({ missingSkills, role }) => {
-  const skeleton = buildRoadmapSkeleton(missingSkills);
+const generateRoadmap = async ({ missing_skills, role }) => {
+  const skeleton = buildRoadmapSkeleton(missing_skills);
 
   const roadmap = [];
 
