@@ -3,7 +3,8 @@ import { SkillsList } from "./SkillsList";
 import { Suggestions } from "./Suggestions";
 
 const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
-  const { match_score, matched_skills, missing_skills, suggestions } = result;
+  console.log(result);
+  const { match_score, matched_skills, missing_skills, explanation } = result;
 
   return (
     <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-2xl border border-gray-100 space-y-10">
@@ -22,7 +23,7 @@ const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
 
       {/* Suggestions */}
       <div>
-        <Suggestions text={suggestions} />
+        <Suggestions text={explanation} />
       </div>
 
       {showRawOutput && rawOutputData && (
