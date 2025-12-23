@@ -1,6 +1,6 @@
 # 🧠 AI Resume Analyzer — Backend
 
-A **production-grade backend** for an AI-powered Resume Analyzer that combines deterministic skill analysis, LLM explanations, dynamic JD-aware scoring, and RAG-based knowledge augmentation.
+A **production-grade backend** for an AI-powered Resume Analyzer that combines deterministic skill analysis, LLM explanations, dynamic JD-aware scoring, RAG-based knowledge augmentation, and ATS simulation.
 
 Built with **clean architecture**, **phase-based evolution**, and **future scalability** in mind.
 
@@ -18,6 +18,7 @@ Built with **clean architecture**, **phase-based evolution**, and **future scala
 - **📈 Dynamic Skill Weighting** — JD-aware importance scoring using RAG
 - **🗺️ Personalized Learning Roadmaps** — Actionable plans for missing skills
 - **🔍 Skill Knowledge Base** — RAG-powered deep dives into technologies
+- **🎯 ATS Behavior Simulation** — Predict resume screening outcomes with optimization feedback
 - **🏗️ Clean Architecture** — Router → Controller → Service → Engine separation
 
 ---
@@ -62,11 +63,15 @@ Built with **clean architecture**, **phase-based evolution**, and **future scala
 ```
 backend/
 ├── api/
-│   └── analyze/
-│       ├── analyze.controller.js      # Core analysis endpoint
-│       ├── roadmap.controller.js      # Learning roadmap generation
-│       ├── skillKnowledge.controller.js  # RAG skill lookup
-│       └── router.js                  # API route definitions
+│   ├── analyze/
+│   │   ├── analyze.controller.js      # Core analysis endpoint
+│   │   ├── roadmap.controller.js      # Learning roadmap generation
+│   │   ├── skillKnowledge.controller.js  # RAG skill lookup
+│   │   └── router.js                  # API route definitions
+│   │
+│   └── ats/
+│       ├── ats.controller.js          # ATS evaluation endpoint
+│       └── ats.router.js              # ATS route definitions
 │
 ├── data/
 │   ├── rag/
@@ -80,6 +85,12 @@ backend/
 │       └── fullstack_jds.txt
 │
 ├── services/
+│   ├── ats/
+│   │   ├── atsRules.js                # ATS screening rules
+│   │   ├── atsSkillEvaluator.js       # Skill importance classifier
+│   │   ├── simulateATS.js             # ATS decision engine
+│   │   └── ats.service.js             # Service orchestration
+│   │
 │   ├── llm/
 │   │   └── explanation.service.js     # LLM explanation generation
 │   │
@@ -249,7 +260,7 @@ Provides grounded, context-aware explanations for individual skills using retrie
 }
 ```
 
-⚠️ **Note:** RAG embeddings are currently disabled to avoid API costs. The infrastructure is complete and can be enabled by setting `ENABLE_EMBEDDINGS=true` in `.env`.
+> ℹ️ **RAG embeddings are disabled by default to avoid API costs.** All RAG logic has a mock fallback mode, ensuring the system remains fully functional without paid embeddings. The infrastructure is complete and can be enabled by setting `ENABLE_EMBEDDINGS=true` in `.env`.
 
 ---
 
@@ -273,16 +284,54 @@ Replaces static skill weights with data-driven importance derived from job descr
 
 ---
 
-### ⏳ Phase 6.3: ATS Behavior Simulation
-**Status:** Planned
+### ✅ Phase 6.3: ATS Behavior Simulation
+**Status:** Complete
 
-Simulate applicant tracking system (ATS) screening rules to predict resume parsing success.
+Simulates real-world Applicant Tracking System (ATS) behavior to predict resume screening outcomes and provide actionable optimization feedback.
 
-**Planned features:**
-- Keyword density analysis
-- Format compatibility checking
-- Section detection validation
-- ATS-friendly formatting suggestions
+**Capabilities:**
+- ATS pass/reject decision
+- Core vs secondary skill classification
+- JD-aware keyword importance
+- ATS rejection reasoning
+- Improvement suggestions for ranking
+
+**How it works:**
+1. Resume skills are analyzed deterministically
+2. JD-aware skill importance is derived (Phase 6.2)
+3. Missing skills are categorized:
+   - Core (hard rejection)
+   - Secondary (ranking penalty)
+4. ATS decision and reasoning are generated
+5. Optimization suggestions are returned for missing keywords
+
+**Endpoint:** `POST /analyze/ats/evaluate`
+
+**Sample Request:**
+```json
+{
+  "jobDescription": "Backend Engineer with AWS, Docker, and Kubernetes",
+  "resumeText": "Node.js backend developer with MongoDB experience"
+}
+```
+
+**Sample Response:**
+```json
+{
+  "success": true,
+  "result": {
+    "ats_decision": "REJECT",
+    "ats_reason": "Missing important ATS keywords",
+    "missing_core_skills": [],
+    "missing_secondary_skills": ["AWS", "Docker", "Kubernetes"],
+    "suggestions": [
+      "Add AWS cloud experience to improve keyword matching",
+      "Include Docker containerization projects",
+      "Mention Kubernetes orchestration skills"
+    ]
+  }
+}
+```
 
 ---
 
@@ -370,12 +419,23 @@ curl -X POST http://localhost:5000/analyze/skill-knowledge \
   }'
 ```
 
+**ATS Simulation:**
+```bash
+curl -X POST http://localhost:5000/analyze/ats/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jobDescription": "Backend Engineer with AWS and Docker",
+    "resumeText": "Node.js backend developer with MongoDB experience"
+  }'
+```
+
 ### Using Postman
 
 Import the following endpoints:
 - `POST /analyze` — Resume analysis
 - `POST /analyze/roadmap` — Learning roadmap
 - `POST /analyze/skill-knowledge` — Skill knowledge base
+- `POST /analyze/ats/evaluate` — ATS simulation
 
 ---
 
@@ -437,7 +497,7 @@ const skillWeights = {
 | Learning Roadmaps | ✅ Complete |
 | RAG Infrastructure | ✅ Ready (billing-gated) |
 | Dynamic Skill Weighting | ✅ Complete (mock mode) |
-| ATS Simulation | 🔴 Planned |
+| ATS Simulation | ✅ Complete |
 | Frontend Integration | 🟡 In Progress |
 
 ---
