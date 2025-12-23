@@ -1,18 +1,23 @@
-const SkillBadge = ({ skill, type }) => {
+const SkillBadge = ({ skill, type, onClick }) => {
   const isMatched = type === "matched";
   const bgColor = isMatched
     ? "bg-green-100 text-green-800"
     : "bg-red-100 text-red-800";
+
+  const cursorStyle =
+    !isMatched && onClick ? "cursor-pointer hover:shadow-md" : "";
+
   return (
     <span
-      className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-full ${bgColor} m-1`}
+      className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-full ${bgColor} ${cursorStyle} m-1`}
+      onClick={!isMatched && onClick ? () => onClick(skill) : undefined}
     >
       {skill}
     </span>
   );
 };
 
-const SkillsList = ({ matchedSkills, missingSkills }) => {
+const SkillsList = ({ matchedSkills, missingSkills, onSkillClick }) => {
   return (
     <div className="space-y-8">
       {/* ===== Matched Skills ===== */}
@@ -42,22 +47,32 @@ const SkillsList = ({ matchedSkills, missingSkills }) => {
 
         {/* Explanation */}
         {missingSkills.length > 0 ? (
-          <p className="text-sm text-gray-600 mb-4 p-3 rounded-md border-l-4 border-red-300 bg-red-50">
-            These skills were{" "}
-            <span className="font-semibold">explicitly expected</span> in the
-            job description but were not found in your resume.
-          </p>
+          <div>
+            <p className="text-sm text-gray-600 mb-4 p-3 rounded-md border-l-4 border-red-300 bg-red-50">
+              These skills were{" "}
+              <span className="font-semibold">explicitly expected</span> in the
+              job description but were not found in your resume.{" "}
+              <span className="font-semibold text-red-600">
+                {onSkillClick && "Click on a skill to learn more."}
+              </span>
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {missingSkills.map((skill) => (
+                <SkillBadge
+                  key={skill}
+                  skill={skill}
+                  type="missing"
+                  onClick={onSkillClick}
+                />
+              ))}
+            </div>
+          </div>
         ) : (
           <p className="text-gray-500 mb-4">
             All required skills were covered.
           </p>
         )}
-
-        <div className="flex flex-wrap gap-2">
-          {missingSkills.map((skill) => (
-            <SkillBadge key={skill} skill={skill} type="missing" />
-          ))}
-        </div>
       </section>
     </div>
   );

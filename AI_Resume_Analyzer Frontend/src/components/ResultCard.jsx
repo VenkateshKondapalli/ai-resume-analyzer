@@ -2,7 +2,8 @@ import { useState } from "react";
 import { MatchScore } from "./MatchScore";
 import { SkillsList } from "./SkillsList";
 import { Suggestions } from "./Suggestions";
-import { generateRoadMap } from "../api/analyze";
+import { fetchSkillKnowledge, generateRoadMap } from "../api/analyze";
+import { SkillKnowledgeModal } from "./SkillKnowledgeModal";
 
 const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
   // console.log(result);
@@ -11,9 +12,6 @@ const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
   const [roadmap, setRoadmap] = useState(null);
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
   const [roadmapError, setRoadmapError] = useState(null);
-  if (roadmap) {
-    console.log(roadmap);
-  }
   const handleGenerateRoadmap = async () => {
     try {
       setLoadingRoadmap(true);
@@ -29,6 +27,19 @@ const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
     }
   };
 
+  const [selectedSkill, setSelectedSkill] = useState(null);
+  const [skillKnowledge, setSkillKnowledge] = useState("");
+  const [loadingSkill, setLoadingSkill] = useState(false);
+
+  const handleSkillClick = async (skill) => {
+    setSelectedSkill(skill);
+    setLoadingSkill(true);
+
+    const res = await fetchSkillKnowledge(skill);
+    setSkillKnowledge(res.result.knowledge);
+    setLoadingSkill(false);
+  };
+
   return (
     <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-2xl border border-gray-100 space-y-10">
       {/* Match Score */}
@@ -41,8 +52,16 @@ const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
         <SkillsList
           matchedSkills={matched_skills}
           missingSkills={missing_skills}
+          onSkillClick={handleSkillClick}
         />
       </div>
+
+      <SkillKnowledgeModal
+        skill={selectedSkill}
+        knowledge={skillKnowledge}
+        loading={loadingSkill}
+        onClose={() => setSelectedSkill(null)}
+      />
 
       {/* Suggestions */}
       <div>
