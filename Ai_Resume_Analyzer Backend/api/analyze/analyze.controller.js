@@ -1,4 +1,4 @@
-const { stimulateATS } = require("../../services/ats/atsSimulator");
+const { simulateATS } = require("../../services/ats/atsSimulator");
 const {
   generateExplanation,
 } = require("../../services/llm/explanation.service");
@@ -32,14 +32,14 @@ const analyzeResume = async (req, res) => {
       jobDescription,
       (options = {})
     );
-    console.log("Skill Analysis Result:", skillResult);
+    // console.log("Skill Analysis Result:", skillResult);
 
     // 2️⃣ LLM EXPLANATION (READ-ONLY)
     const explanation = await generateExplanation(skillResult);
 
     const jdImportance = await getJDSkillImportance(jobDescription);
 
-    const atsResult = stimulateATS({ skillResult, jdImportance });
+    const atsResult = simulateATS({ skillResult, jdImportance });
 
     // 3️⃣ FINAL RESPONSE
     return res.json({
