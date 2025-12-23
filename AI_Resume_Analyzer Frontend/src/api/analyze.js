@@ -38,4 +38,19 @@ const analyzeResume = async (data) => {
   }
 };
 
-export { analyzeResume };
+const generateRoadMap = async (missing_skills, role) => {
+  const resp = await axiosInstance.post("/analyze/roadmap", {
+    missing_skills: missing_skills,
+    role: role,
+  });
+  return resp.data;
+};
+
+const fetchSkillKnowledge = async (skill) => {
+  const resp = await axiosInstance.post("/analyze/skill-knowledge", {
+    skill: skill,
+  });
+  return resp.data;
+};
+
+export { analyzeResume, generateRoadMap, fetchSkillKnowledge };

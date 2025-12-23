@@ -140,7 +140,7 @@ const ResumeForm = ({
       {/* Submit */}
       <button
         type="submit"
-        disabled={isFormDisabled}
+        disabled={!!isFormDisabled}
         className={`w-full py-3 rounded-md text-white ${
           isFormDisabled
             ? "bg-gray-400 cursor-not-allowed"
