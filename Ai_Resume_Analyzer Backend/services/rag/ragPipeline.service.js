@@ -16,18 +16,4 @@ async function runSkillRag(skill) {
   return await callLLMWithPrompt(prompt);
 }
 
-if (require.main === module) {
-  (async () => {
-    try {
-      await initRag();
-      const result = await runSkillRag("AWS");
-      console.log("\n✅ RAG OUTPUT:\n", result);
-    } catch (err) {
-      console.error("❌ RAG ERROR:", err);
-    } finally {
-      process.exit(0);
-    }
-  })();
-}
-
 module.exports = { initRag, runSkillRag };
