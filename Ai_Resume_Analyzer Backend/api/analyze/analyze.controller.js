@@ -2,6 +2,9 @@ const { stimulateATS } = require("../../services/ats/atsSimulator");
 const {
   generateExplanation,
 } = require("../../services/llm/explanation.service");
+const {
+  getJDSkillImportance,
+} = require("../../services/rag/jdImportance/jdImportance.service");
 const { extractResumeText } = require("../../services/resumeParser");
 const { analyzeSkills } = require("../../services/skills/analyzeSkills");
 
@@ -33,6 +36,8 @@ const analyzeResume = async (req, res) => {
 
     // 2️⃣ LLM EXPLANATION (READ-ONLY)
     const explanation = await generateExplanation(skillResult);
+
+    const jdImportance = await getJDSkillImportance(jobDescription);
 
     const atsResult = stimulateATS({ skillResult, jdImportance });
 
