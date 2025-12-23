@@ -1,3 +1,4 @@
+const { stimulateATS } = require("../../services/ats/atsSimulator");
 const {
   generateExplanation,
 } = require("../../services/llm/explanation.service");
@@ -33,6 +34,8 @@ const analyzeResume = async (req, res) => {
     // 2️⃣ LLM EXPLANATION (READ-ONLY)
     const explanation = await generateExplanation(skillResult);
 
+    const atsResult = stimulateATS({ skillResult, jdImportance });
+
     // 3️⃣ FINAL RESPONSE
     return res.json({
       success: true,
@@ -41,6 +44,7 @@ const analyzeResume = async (req, res) => {
         explanation:
           explanation ||
           "Suggestions unavailable. Skill analysis above is accurate.",
+        ats_simulation: atsResult,
       },
     });
   } catch (err) {
