@@ -1,5 +1,4 @@
 const HomePage = () => {
-  console.log("hello this venkatesh");
   return (
     // Outer container: centered, max width, padding
     <div className="p-10 mx-auto max-w-4xl text-center font-sans">
