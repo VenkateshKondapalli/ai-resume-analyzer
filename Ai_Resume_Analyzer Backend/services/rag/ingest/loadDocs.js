@@ -8,7 +8,7 @@ function loadAwsDocs() {
     "../../../data/rag/aws/aws_context.txt"
   );
 
-  console.log("📄 Resolved AWS file path:", filePath);
+  // console.log("📄 Resolved AWS file path:", filePath);
 
   const content = fs.readFileSync(filePath, "utf-8");
 

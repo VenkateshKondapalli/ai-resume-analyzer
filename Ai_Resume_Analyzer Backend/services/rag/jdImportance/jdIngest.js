@@ -36,7 +36,7 @@ function loadJdDatasets() {
             });
           });
         allDocuments = [...allDocuments, ...docs];
-        console.log(`✅ Loaded ${docs.length} JDs from ${fileInfo.name}`);
+        // console.log(`✅ Loaded ${docs.length} JDs from ${fileInfo.name}`);
       } else {
         console.warn(`⚠️ Warning: File not found at ${filePath}`);
       }
@@ -48,10 +48,3 @@ function loadJdDatasets() {
 }
 
 module.exports = { loadJdDatasets };
-
-// if (require.main === module) {
-//   const docs = loadJdDatasets();
-//   console.log("\n--- Sample Document Metadata ---");
-//   if (docs.length > 0) console.log(docs[0].metadata);
-//   console.log(`\nTotal JDs ingested: ${docs.length}`);
-// }
