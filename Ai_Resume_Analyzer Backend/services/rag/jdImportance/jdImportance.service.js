@@ -16,15 +16,3 @@ async function getJDSkillImportance(jobDescription, options = {}) {
 }
 
 module.exports = { getJDSkillImportance };
-
-if (require.main === module) {
-  const testJD = `
-    We are hiring a Backend Developer with strong Node.js,
-    AWS cloud experience, Docker, and REST API skills.
-  `;
-
-  getJDSkillImportance(testJD).then((res) => {
-    console.log("🧪 JD Importance Service Test:");
-    console.log(JSON.stringify(res, null, 2));
-  });
-}
