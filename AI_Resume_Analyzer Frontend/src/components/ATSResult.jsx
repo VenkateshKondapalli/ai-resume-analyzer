@@ -1,7 +1,14 @@
+import { ATSImprovementSuggestions } from "./ATSImprovementSuggestions";
+
 const ATSResult = ({ ats }) => {
   if (!ats) return null;
 
-  const { ats_decision, ats_reason, missing_core_skills = [] } = ats;
+  const {
+    ats_decision,
+    ats_reason,
+    missing_core_skills = [],
+    missing_secondary_skills = [],
+  } = ats;
 
   const isPass = ats_decision === "PASS";
 
@@ -27,30 +34,46 @@ const ATSResult = ({ ats }) => {
         <strong>Reason:</strong> {ats_reason}
       </p>
 
-      {/* Missing Core Skills */}
-      {!isPass && missing_core_skills.length > 0 && (
-        <div className="mb-4">
-          <p className="font-medium text-gray-800 mb-2">
-            Missing Core Skills (ATS Critical):
-          </p>
-          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-            {missing_core_skills.map((skill) => (
-              <li key={skill}>{skill}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Fail / Improvement Section */}
+      {!isPass &&
+        (missing_core_skills.length > 0 ||
+          missing_secondary_skills.length > 0) && (
+          <div className="space-y-6">
+            {/* Missing Core Skills */}
+            {missing_core_skills.length > 0 && (
+              <div>
+                <p className="font-medium text-gray-800 mb-2">
+                  Missing Core Skills (ATS Critical):
+                </p>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {missing_core_skills.map((skill, index) => (
+                    <li key={`${skill}-${index}`}>{skill}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-      {/* Suggestions */}
-      {!isPass && (
-        <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-          <p className="text-sm text-yellow-800">
-            💡 <strong>Tip:</strong> Add hands-on project experience or resume
-            bullet points mentioning the missing core skills to improve ATS
-            ranking.
-          </p>
-        </div>
-      )}
+            {/* Missing Secondary Skills */}
+            {missing_secondary_skills.length > 0 && (
+              <div>
+                <p className="font-medium text-gray-800 mb-2">
+                  Missing ATS Keywords (Important):
+                </p>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {missing_secondary_skills.map((skill) => (
+                    <li key={skill}>{skill}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* ATS Improvement Suggestions */}
+            <ATSImprovementSuggestions
+              missing_core_skills={missing_core_skills}
+              missing_secondary_skills={missing_secondary_skills}
+            />
+          </div>
+        )}
     </div>
   );
 };
