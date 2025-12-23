@@ -4,6 +4,7 @@ import { SkillsList } from "./SkillsList";
 import { Suggestions } from "./Suggestions";
 import { fetchSkillKnowledge, generateRoadMap } from "../api/analyze";
 import { SkillKnowledgeModal } from "./SkillKnowledgeModal";
+import { ATSResult } from "./ATSResult";
 
 const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
   // console.log(result);
@@ -67,6 +68,8 @@ const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
       <div>
         <Suggestions text={explanation} />
       </div>
+
+      {result?.ats_simulation && <ATSResult ats={result.ats_simulation} />}
 
       {missing_skills?.length > 0 && (
         <div className="pt-6 border-t space-y-4">
