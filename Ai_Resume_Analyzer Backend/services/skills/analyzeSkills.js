@@ -85,15 +85,3 @@ const validateSkillResult = (result) => {
 };
 
 module.exports = { analyzeSkills };
-
-if (require.main == module) {
-  const resumeText =
-    "Backend Engineer with 4 years of experience in Node.js and Express. Strong hands-on experience with MongoDB and RESTful API development. Worked extensively with Docker for containerization and CI/CD pipelines using GitHub Actions.Proficient with Git and Agile development practices.";
-  const jobDescription =
-    "We are hiring a Backend Engineer with strong experience in Node.js and Express. The role requires expertise in MongoDB, RESTful APIs, Docker, and CI/CD pipelines. Experience with AWS and Git is mandatory.";
-
-  const result = analyzeSkills(resumeText, jobDescription, {
-    useDynamicWeights: true,
-  });
-  console.log(result);
-}
