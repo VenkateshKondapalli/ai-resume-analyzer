@@ -530,6 +530,6 @@ rm -rf .vite
 
 ---
 
-**Built with ❤️ by [Your Name/Team]**
+**Built with ❤️ by [Venkatesh kondapalli]**
 
 *Making AI-powered resume analysis transparent, actionable, and user-friendly.*
