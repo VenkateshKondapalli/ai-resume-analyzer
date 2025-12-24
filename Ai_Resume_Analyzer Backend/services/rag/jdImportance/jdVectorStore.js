@@ -37,24 +37,3 @@ function getJDVectorStore() {
 }
 
 module.exports = { getJDVectorStore, initJDVectorStore };
-
-if (require.main === module) {
-  (async () => {
-    try {
-      const store = await initJDVectorStore();
-      const results = await store.similaritySearch(
-        "Looking for a backend developer with AWS and Node.js experience",
-        2
-      );
-
-      console.log("\n🔍 Sample JD Retrieval:");
-      results.forEach((doc, i) => {
-        console.log(`\nResult ${i + 1}:`);
-        console.log("Role:", doc.metadata.role);
-        console.log("Content Preview:", doc.pageContent.slice(0, 200), "...");
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  })();
-}
