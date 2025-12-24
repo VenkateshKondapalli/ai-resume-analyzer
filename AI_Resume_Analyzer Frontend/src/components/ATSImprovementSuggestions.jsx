@@ -15,7 +15,7 @@ const ATSImprovementSuggestions = ({
   if (!suggestions.length) return null;
 
   return (
-    <div className="mt-8 bg-slate-900 rounded-[2rem] p-6 sm:p-8 text-slate-200 shadow-2xl shadow-slate-200/50 overflow-hidden relative">
+    <div className="mt-8 bg-slate-900 rounded-4xl p-6 sm:p-8 text-slate-200 shadow-2xl shadow-slate-200/50 overflow-hidden relative">
       {/* Decorative background element */}
       <div className="absolute top-0 right-0 p-4 opacity-10">
         <Wrench className="w-24 h-24 rotate-12" />
