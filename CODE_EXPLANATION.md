@@ -1093,7 +1093,7 @@ const partialMatchMap = {
   "React": ["React.js", "ReactJS", "React Native"],
   "Node.js": ["Node", "NodeJS", "node js"],
   "JavaScript": ["JS", "ECMAScript", "ES6"],
-  "Docker": ["Containerization", "Container"],
+  "Docker": ["Containerization", "Containers"],
   // ...
 };
 
