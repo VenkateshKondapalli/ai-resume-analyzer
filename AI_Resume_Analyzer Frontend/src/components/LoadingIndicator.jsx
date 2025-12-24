@@ -17,12 +17,12 @@ const LoadingIndicator = () => {
       setCurrentTip((prev) => (prev + 1) % tips.length);
     }, 3500);
     return () => clearInterval(interval);
-  }, []);
+  }, [tips.length]);
 
   return (
     <div className="flex flex-col items-center justify-center p-12 max-w-2xl mx-auto bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100 border border-indigo-50 relative overflow-hidden">
       {/* Background Decorative Element */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-pulse"></div>
+      <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 animate-pulse"></div>
 
       {/* Main Animated Visual */}
       <div className="relative mb-10">
@@ -89,10 +89,10 @@ const LoadingIndicator = () => {
       {/* Progress Bar Container */}
       <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden shadow-inner">
         <div
-          className="h-full bg-gradient-to-r from-indigo-600 to-purple-600 transition-all duration-700 ease-out"
+          className="h-full bg-linear-to-r from-indigo-600 to-purple-600 transition-all duration-700 ease-out"
           style={{ width: "65%" }}
         >
-          <div className="w-full h-full opacity-30 bg-[linear-gradient(45deg,rgba(255,255,255,.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,.15)_50%,rgba(255,255,255,.15)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[move_1s_linear_infinite]"></div>
+          <div className="w-full h-full opacity-30 bg-[linear-gradient(45deg,rgba(255,255,255,.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,.15)_50%,rgba(255,255,255,.15)_75%,transparent_75%,transparent)] bg-size-[1rem_1rem] animate-[move_1s_linear_infinite]"></div>
         </div>
       </div>
 

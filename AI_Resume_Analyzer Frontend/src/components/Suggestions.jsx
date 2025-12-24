@@ -1,4 +1,3 @@
-import React from "react";
 import { Sparkles, CheckCircle, ArrowRight, Wrench, Info } from "lucide-react";
 
 const parseSuggestions = (text) => {
@@ -39,7 +38,7 @@ const Suggestions = ({ text }) => {
             {steps.map((step, index) => (
               <div key={index} className="flex gap-4 group">
                 {/* Numbered Step Indicator */}
-                <div className="flex-shrink-0 flex flex-col items-center">
+                <div className="shrink-0 flex flex-col items-center">
                   <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 font-bold text-sm group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
                     {index + 1}
                   </div>

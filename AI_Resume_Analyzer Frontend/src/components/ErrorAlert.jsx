@@ -7,7 +7,7 @@ const ErrorAlert = ({ message, onRetry }) => {
     "Our AI engine encountered a temporary roadblock while processing your documents.";
 
   return (
-    <div className="max-w-4xl mx-auto overflow-hidden bg-white rounded-[2rem] border border-rose-100 shadow-xl shadow-rose-100/20 animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="max-w-4xl mx-auto overflow-hidden bg-white rounded-4xl border border-rose-100 shadow-xl shadow-rose-100/20 animate-in fade-in slide-in-from-top-4 duration-500">
       <div className="flex flex-col md:flex-row">
         {/* Visual Sidebar */}
         <div className="bg-rose-500 w-full md:w-16 flex items-center justify-center py-4 md:py-0">
