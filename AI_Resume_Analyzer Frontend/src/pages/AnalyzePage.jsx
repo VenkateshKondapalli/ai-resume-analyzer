@@ -3,9 +3,9 @@ import { ResumeForm } from "../components/ResumeForm";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { ResultCard } from "../components/ResultCard";
+import { Terminal, LayoutDashboard, Database, RefreshCw } from "lucide-react";
 
 const AnalyzePage = () => {
-  // ---------- State ----------
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -13,37 +13,21 @@ const AnalyzePage = () => {
 
   const formSubmitRef = useRef(null);
 
-  // ---------- Error Mapping ----------
   const getFriendlyErrorMessage = (err) => {
     const status = err?.response?.status;
-
-    if (status === 400) {
-      return "Please check your resume or job description and try again.";
-    }
-
-    if (status === 502) {
-      return "AI failed to generate a valid response. Please try again.";
-    }
-
-    if (status === 503) {
-      return "AI is currently overloaded. Please wait a few seconds and retry.";
-    }
-
+    if (status === 400) return "Check your resume or job description format.";
+    if (status === 502) return "The AI drifted off. Please try again.";
+    if (status === 503) return "Server is busy. Try again in a few seconds.";
     return "Something went wrong. Please try again later.";
   };
 
-  // ---------- Centralized Error Handler ----------
   const handleError = (err) => {
-    console.error("FULL ERROR OBJECT:", err);
-    const message = getFriendlyErrorMessage(err);
-    setErrorMessage(message);
+    setErrorMessage(getFriendlyErrorMessage(err));
   };
 
   const handleRetry = () => {
-    if (formSubmitRef.current && formSubmitRef.current.triggerSubmit) {
+    if (formSubmitRef.current?.triggerSubmit) {
       formSubmitRef.current.triggerSubmit();
-    } else {
-      console.warn("Cannot retry submission: Form handler not yet ready.");
     }
   };
 
@@ -51,58 +35,111 @@ const AnalyzePage = () => {
     formSubmitRef.current = handlers;
   };
 
-  // ---------- UI Switch ----------
   const renderContent = () => {
-    if (isLoading) return <LoadingIndicator />;
-    if (errorMessage)
-      return <ErrorAlert message={errorMessage} onRetry={handleRetry} />;
-    if (analysisResult)
+    if (isLoading) {
       return (
-        <ResultCard
-          result={analysisResult}
-          showRawOutput={showRawOutput}
-          rawOutputData={analysisResult}
-        />
+        <div className="flex flex-col items-center justify-center py-20 space-y-4">
+          <LoadingIndicator />
+          <p className="text-indigo-600 font-medium animate-pulse">
+            Gemini AI is dissecting your resume...
+          </p>
+        </div>
       );
+    }
+
+    if (errorMessage) {
+      return (
+        <div className="max-w-2xl mx-auto transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
+          <ErrorAlert message={errorMessage} onRetry={handleRetry} />
+        </div>
+      );
+    }
+
+    if (analysisResult) {
+      return (
+        <div className="transition-all duration-700 animate-in fade-in zoom-in-95">
+          <ResultCard
+            result={analysisResult}
+            showRawOutput={showRawOutput}
+            rawOutputData={analysisResult}
+          />
+        </div>
+      );
+    }
 
     return (
-      <p className="text-center text-gray-500 mt-8">
-        Enter a resume and job description above to begin the analysis.
-      </p>
+      <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-gray-200 rounded-3xl bg-white/50">
+        <div className="p-4 bg-indigo-50 rounded-full mb-4">
+          <LayoutDashboard className="w-8 h-8 text-indigo-500" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900">No Analysis Yet</h3>
+        <p className="text-gray-500 max-w-xs text-center">
+          Upload your documents above to see your match score and skill gaps.
+        </p>
+      </div>
     );
   };
 
-  // ---------- Render ----------
   return (
-    <div className="py-12 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
-        Resume Analyzer
-      </h1>
+    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+      {/* Header Section */}
+      <div className="bg-white border-b border-gray-200 mb-10">
+        <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+              AI Analysis <span className="text-indigo-600">Hub</span>
+            </h1>
+            <p className="text-gray-500 text-sm mt-1 font-medium">
+              Compare your profile against industry standards
+            </p>
+          </div>
 
-      <ResumeForm
-        setAnalysisResult={setAnalysisResult}
-        setIsLoading={setIsLoading}
-        setError={handleError}
-        clearError={() => setErrorMessage(null)}
-        isFormDisabled={isLoading}
-        onDataReady={handleFormReady}
-      />
+          {analysisResult && (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowRawOutput(!showRawOutput)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                  showRawOutput
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                {showRawOutput ? (
+                  <Database className="w-4 h-4" />
+                ) : (
+                  <Terminal className="w-4 h-4" />
+                )}
+                {showRawOutput ? "Hide JSON" : "Debug Mode"}
+              </button>
 
-      {analysisResult && (
-        <div className="flex justify-center mt-6">
-          <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showRawOutput}
-              onChange={() => setShowRawOutput(!showRawOutput)}
-              className="form-checkbox h-4 w-4 text-indigo-600 rounded"
-            />
-            <span>Show Debug Raw Output (JSON)</span>
-          </label>
+              <button
+                onClick={() => window.location.reload()}
+                className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+                title="Reset Analysis"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      <div className="mt-10 px-4">{renderContent()}</div>
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Form Section - Encapsulated in a card style */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-2 md:p-6 mb-8">
+          <ResumeForm
+            setAnalysisResult={setAnalysisResult}
+            setIsLoading={setIsLoading}
+            setError={handleError}
+            clearError={() => setErrorMessage(null)}
+            isFormDisabled={isLoading}
+            onDataReady={handleFormReady}
+          />
+        </div>
+
+        {/* Dynamic Content Area */}
+        <div className="relative">{renderContent()}</div>
+      </div>
     </div>
   );
 };
