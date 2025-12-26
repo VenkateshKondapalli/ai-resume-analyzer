@@ -1,4 +1,3 @@
-import React from "react";
 import { CheckCircle, XCircle, Info, Lightbulb } from "lucide-react";
 
 const SkillBadge = ({ skill, type, onClick }) => {

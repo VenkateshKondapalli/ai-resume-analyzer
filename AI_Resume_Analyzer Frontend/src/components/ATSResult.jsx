@@ -1,4 +1,3 @@
-import React from "react";
 import { ATSImprovementSuggestions } from "./ATSImprovementSuggestions";
 import {
   ShieldAlert,

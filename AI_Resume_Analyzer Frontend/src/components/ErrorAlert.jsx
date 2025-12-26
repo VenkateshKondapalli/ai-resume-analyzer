@@ -1,4 +1,3 @@
-import React from "react";
 import { AlertCircle, RefreshCw, XCircle, Info } from "lucide-react";
 
 const ErrorAlert = ({ message, onRetry }) => {
