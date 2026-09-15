@@ -64,7 +64,10 @@ const HomePage = () => {
               </span>
             </button>
 
-            <button className="px-10 py-5 text-lg font-bold text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:scale-105">
+            <button
+              className="px-10 py-5 text-lg font-bold text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:scale-105"
+              onClick={() => (window.location.href = "/analyze")}
+            >
               View Demo
             </button>
           </div>

@@ -11,7 +11,7 @@ const getSkillKnowledgeController = async (req, res) => {
       });
     }
 
-    const explanation = runSkillRag(skill.trim());
+    const explanation = await runSkillRag(skill.trim());
 
     return res.json({
       skill: skill.trim(),

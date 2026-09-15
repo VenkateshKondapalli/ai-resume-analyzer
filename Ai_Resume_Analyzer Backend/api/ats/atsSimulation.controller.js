@@ -1,4 +1,4 @@
-const { stimulateATS } = require("../../services/ats/atsSimulator");
+const { simulateATS } = require("../../services/ats/atsSimulator");
 const {
   getJDSkillImportance,
 } = require("../../services/rag/jdImportance/jdImportance.service");
@@ -15,11 +15,11 @@ const simulateATSController = async (req, res) => {
       });
     }
 
-    const skillResult = analyzeSkills(resumeText, jobDescription);
+    const skillResult = await analyzeSkills(resumeText, jobDescription);
 
     const jdImportance = await getJDSkillImportance(jobDescription);
 
-    const atsResult = stimulateATS({
+    const atsResult = simulateATS({
       skillResult,
       jdImportance,
     });

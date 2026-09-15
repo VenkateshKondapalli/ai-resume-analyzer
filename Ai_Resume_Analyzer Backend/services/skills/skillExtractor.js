@@ -38,7 +38,9 @@ const extractSkillsFromText = (text) => {
     const aliases = SKILL_DICTIONARY[canonicalSkill];
 
     for (const alias of aliases) {
-      if (normalized.includes(alias)) {
+      const escapedAlias = alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`(?:^|\\s|[^a-z0-9])${escapedAlias}(?:$|\\s|[^a-z0-9])`);
+      if (regex.test(normalized)) {
         foundSkills.add(canonicalSkill);
         break;
       }

@@ -27,10 +27,10 @@ const analyzeResume = async (req, res) => {
     }
 
     // 1️⃣ RULE-BASED SKILL ANALYSIS (SOURCE OF TRUTH)
-    const skillResult = analyzeSkills(
+    const skillResult = await analyzeSkills(
       resumeText,
       jobDescription,
-      (options = {})
+      {}
     );
     // console.log("Skill Analysis Result:", skillResult);
 

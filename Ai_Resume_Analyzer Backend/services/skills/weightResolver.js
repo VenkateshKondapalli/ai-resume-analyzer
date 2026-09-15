@@ -15,4 +15,4 @@ function resolveSkillsWeights(jdImpotance = {}) {
   return weights;
 }
 
-module.exports = { DEFAULT_WEIGHT, resolveSkillsWeights };
+module.exports = { DEFAULT_WEIGHT, resolveSkillWeights: resolveSkillsWeights };

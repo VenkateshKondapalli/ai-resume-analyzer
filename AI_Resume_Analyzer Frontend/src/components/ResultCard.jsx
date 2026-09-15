@@ -53,7 +53,7 @@ const ResultCard = ({ result, showRawOutput, rawOutputData }) => {
       const res = await fetchSkillKnowledge(skill);
       // FIXED: Added optional chaining to prevent 'reading knowledge of undefined'
       setSkillKnowledge(
-        res?.result?.knowledge || "No specific knowledge found for this skill."
+        res?.explanation || "No specific knowledge found for this skill."
       );
     } catch (err) {
       setSkillKnowledge("Knowledge retrieval failed. Check your connection.");

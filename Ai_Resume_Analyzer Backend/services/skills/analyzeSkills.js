@@ -8,7 +8,7 @@ const { skillComparison } = require("./skillComparison");
 const { extractSkillsFromText } = require("./skillExtractor");
 const { computeSkillScore } = require("./skillScore");
 
-const analyzeSkills = (resumeText = "", jobDescription = "", options = {}) => {
+const analyzeSkills = async (resumeText = "", jobDescription = "", options = {}) => {
   const rText = typeof resumeText === "string" ? resumeText : "";
   const jText = typeof jobDescription === "string" ? jobDescription : "";
 
@@ -24,7 +24,7 @@ const analyzeSkills = (resumeText = "", jobDescription = "", options = {}) => {
 
   if (options.useDynamicWeights !== false && jText.trim()) {
     try {
-      const jdImportance = getJDSkillImportance(jText);
+      const jdImportance = await getJDSkillImportance(jText);
       dynamicWeights = resolveSkillWeights(jdImportance);
     } catch (err) {
       console.warn(
